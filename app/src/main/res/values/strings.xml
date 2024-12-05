@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Finalproject_Prototype1</string>
+    <!--Home Page - press play strings-->
+    <string name="main_Title">Pattern CopyCat</string>
+    <string name="main_Subtitle">Are Your Eyes Fast Enough To Beat The CopyCat?</string>
+    <string name="main_btnLabel">Press Play and Tilt To Win!</string>
+    <string name="home_btnAction_Play">PLAY</string>
 </resources>
