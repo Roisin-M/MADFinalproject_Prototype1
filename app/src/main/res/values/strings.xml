@@ -5,4 +5,9 @@
     <string name="main_Subtitle">Are Your Eyes Fast Enough To Beat The CopyCat?</string>
     <string name="main_btnLabel">Press Play and Tilt To Win!</string>
     <string name="home_btnAction_Play">PLAY</string>
+    <!--Game Over - screen-->
+    <string name="GmOver_Title">GAME OVER</string>
+    <string name="GmOver_ScoreLabel">Your Score : </string>
+    <string name="GmOver_PlayAgain">PLAY AGAIN</string>
+    <string name="GmOver_leaderBrd">LEADERBOARD</string>
 </resources>
