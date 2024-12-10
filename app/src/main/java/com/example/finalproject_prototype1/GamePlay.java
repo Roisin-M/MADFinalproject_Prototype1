@@ -1,5 +1,6 @@
 package com.example.finalproject_prototype1;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -28,6 +29,8 @@ public class GamePlay extends AppCompatActivity {
     private List<Integer> userInput; // User input sequence
     private Handler handler = new Handler(); // Handler for delayed tasks
     private Random random = new Random(); // Random generator
+    private int score = 0; // Track the score
+    private int sequenceLength = 4; // level 1 is 4 colours
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +38,7 @@ public class GamePlay extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_play);
 
-        // Initialize buttons and TextView
+        // Initialise buttons and TextView
         yellowWool = findViewById(R.id.IV_yellowWool);
         redWool = findViewById(R.id.IV_RedWool);
         greenWool = findViewById(R.id.IV_GreenWool);
@@ -52,7 +55,7 @@ public class GamePlay extends AppCompatActivity {
         // Display game countdown using Runnable to wait for methods to complete
         displayCountDown(() -> {
             generateRandomSequence(4);
-            displaySequence(() -> enableUserInput());
+            displaySequence(this::enableUserInput);
         });
     }
     // Display a countdown before the game starts
@@ -62,10 +65,10 @@ public class GamePlay extends AppCompatActivity {
         handler.postDelayed(() -> countDown.setText("2"), 1000);
         handler.postDelayed(() -> countDown.setText("1"), 2000);
         // Hide the countdown text after the countdown is done
-        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 3000);
-
-        // Call the onComplete Runnable after the countdown finishes
-        handler.postDelayed(onComplete, countdownDuration);
+        handler.postDelayed(() -> {
+            countDown.setVisibility(View.INVISIBLE);
+            onComplete.run(); // Execute the next task after countdown
+        }, 4000);
     }
     // Generate a random sequence of indices
     private void generateRandomSequence(int length) {
@@ -92,7 +95,7 @@ public class GamePlay extends AppCompatActivity {
     private void enableUserInput() {
         //prompt user to input
         countDown.setVisibility(View.VISIBLE);
-        countDown.setText("COPY");
+        countDown.setText("COPY!");
         handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
         // add click listeners to the buttons
         userInput = new ArrayList<>();
@@ -112,12 +115,16 @@ public class GamePlay extends AppCompatActivity {
                 if (userInput.size() == sequence.size()) {
                     countDown.setVisibility(View.VISIBLE);
                     countDown.setText("You Won!");
+                    //update score
+                    score += sequenceLength;
                     disableUserInput(); // Disable further input
+                    prepareNextRound();
                 }
             } else {
                 countDown.setVisibility(View.VISIBLE);
                 countDown.setText("You Lost!");
                 disableUserInput(); // Disable further input
+                handler.postDelayed(this::navigateToGameOver,2000); // Navigate to game over
             }
         }
     }
@@ -135,4 +142,27 @@ public class GamePlay extends AppCompatActivity {
             button.setOnClickListener(null); // Remove click listener
         }
     }
+    // Prepare the next round of the game
+    private void prepareNextRound() {
+        handler.postDelayed(() -> {
+            sequenceLength += 2; // Increase sequence length by 2
+            displayCountDown(() -> {
+                //start next round with updated sequence
+                generateRandomSequence(sequenceLength);
+                displaySequence(this::enableUserInput);
+            });
+        }, 2000); // Delay before starting the next round
+    }
+    // Navigate to the GameOver screen and pass score
+    private void navigateToGameOver() {
+        try {
+            Intent pGO = new Intent(GamePlay.this, GameOver.class);
+            pGO.putExtra("score", score); // Pass the score to GameOver activity
+            startActivity(pGO);
+            finish(); // End the current GamePlay activity
+        } catch (Exception e) {
+            e.printStackTrace(); // Log any errors
+        }
+    }
+
 }
