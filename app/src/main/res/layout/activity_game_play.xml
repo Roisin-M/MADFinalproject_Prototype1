@@ -9,93 +9,78 @@
     android:orientation="horizontal"
     tools:context=".GamePlay">
 
-    <ImageView
+    <ImageButton
         android:id="@+id/IV_yellowWool"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
+        android:layout_width="115dp"
+        android:layout_height="116dp"
+        android:adjustViewBounds="true"
+        android:background="@null"
+        android:contentDescription="Yellow wool ball"
+        android:scaleType="centerCrop"
+        android:src="@drawable/yellowwool"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.091"
-        app:srcCompat="@drawable/yellowwool" />
+        app:layout_constraintVertical_bias="0.061" />
 
-    <ImageView
-        android:id="@+id/IV_yellowWool_Highlight"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.091"
-        app:srcCompat="@drawable/whitewool" />
-
-    <ImageView
+    <ImageButton
         android:id="@+id/IV_RedWool"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
+        android:layout_width="115dp"
+        android:layout_height="116dp"
+        android:src="@drawable/redwool"
+        android:background="@null"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.047"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.489"
-        app:srcCompat="@drawable/redwool" />
+        android:contentDescription="Red wool ball"/>
 
-    <ImageView
-        android:id="@+id/IV_RedWool_Highlight"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.489"
-        app:srcCompat="@drawable/whitewool" />
-
-    <ImageView
+    <ImageButton
         android:id="@+id/IV_GreenWool"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
+        android:layout_width="115dp"
+        android:layout_height="116dp"
+        android:src="@drawable/greenwool"
+        android:background="@null"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.933"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/greenwool" />
+        android:contentDescription="Green wool ball"/>
 
-    <ImageView
-        android:id="@+id/IV_GreenWool_Highlight"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.933"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/whitewool" />
-
-    <ImageView
+    <ImageButton
         android:id="@+id/IV_BlueWool"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
+        android:layout_width="115dp"
+        android:layout_height="116dp"
+        android:adjustViewBounds="true"
+        android:background="@null"
+        android:contentDescription="Blue wool ball"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bluewool"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.897"
-        app:srcCompat="@drawable/bluewool" />
+        app:layout_constraintVertical_bias="0.938" />
 
-    <ImageView
-        android:id="@+id/IV_BlueWool_Highlight"
-        android:layout_width="143dp"
-        android:layout_height="117dp"
+    <TextView
+        android:id="@+id/tv_CountDown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@color/black_strong"
+        android:textSize="96sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.897"
-        app:srcCompat="@drawable/whitewool" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

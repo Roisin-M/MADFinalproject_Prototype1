@@ -1,6 +1,13 @@
 package com.example.finalproject_prototype1;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,17 +15,124 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class GamePlay extends AppCompatActivity {
+
+    private ImageButton yellowWool, redWool, greenWool, blueWool;
+    private TextView countDown;
+    private List<ImageButton> buttonList; // List of wool buttons
+    private List<Integer> sequence; // Random sequence of indices
+    private List<Integer> userInput; // User input sequence
+    private Handler handler = new Handler(); // Handler for delayed tasks
+    private Random random = new Random(); // Random generator
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_play);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        // Initialize buttons and TextView
+        yellowWool = findViewById(R.id.IV_yellowWool);
+        redWool = findViewById(R.id.IV_RedWool);
+        greenWool = findViewById(R.id.IV_GreenWool);
+        blueWool = findViewById(R.id.IV_BlueWool);
+        countDown = findViewById(R.id.tv_CountDown);
+
+        // Add Image buttons to the list in the same order as the sequence
+        buttonList = new ArrayList<>();
+        buttonList.add(redWool); // 0 - Red
+        buttonList.add(yellowWool); // 1 - Yellow
+        buttonList.add(greenWool); // 2 - Green
+        buttonList.add(blueWool); // 3 - Blue
+
+        // Display game countdown using Runnable to wait for methods to complete
+        displayCountDown(() -> {
+            generateRandomSequence(4);
+            displaySequence(() -> enableUserInput());
         });
+    }
+    // Display a countdown before the game starts
+    private void displayCountDown(Runnable onComplete) {
+        int countdownDuration = 4000; // Total countdown duration
+        handler.postDelayed(() -> countDown.setText("3"), 0);
+        handler.postDelayed(() -> countDown.setText("2"), 1000);
+        handler.postDelayed(() -> countDown.setText("1"), 2000);
+        // Hide the countdown text after the countdown is done
+        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 3000);
+
+        // Call the onComplete Runnable after the countdown finishes
+        handler.postDelayed(onComplete, countdownDuration);
+    }
+    // Generate a random sequence of indices
+    private void generateRandomSequence(int length) {
+        sequence = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            sequence.add(random.nextInt(buttonList.size())); // Random index for highlight wool
+        }
+    }
+    // Display the sequence to the user
+    private void displaySequence(Runnable onComplete) {
+        for (int i = 0; i < sequence.size(); i++) {
+            final int index = sequence.get(i); // Get the wool index of the button
+            final ImageButton button = buttonList.get(index); // Get the button to highlight
+            handler.postDelayed(() -> {
+                button.setImageResource(R.drawable.whitewool); // Show highlight by setting source
+                handler.postDelayed(() -> button.setImageResource(
+                        getWoolDrawable(button)), 500); // Revert to original source
+            }, i * 2000); // Highlight with a delay
+        }
+        // Call the onComplete Runnable after the sequence finishes
+        handler.postDelayed(onComplete, sequence.size() * 2000);
+    }
+    // Enable user input by setting click listeners
+    private void enableUserInput() {
+        //prompt user to input
+        countDown.setVisibility(View.VISIBLE);
+        countDown.setText("COPY");
+        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
+        // add click listeners to the buttons
+        userInput = new ArrayList<>();
+        for (int i = 0; i < buttonList.size(); i++) {
+            final int index = i; // Capture the index for comparison
+            ImageButton button = buttonList.get(i);
+            button.setOnClickListener(v -> {
+                userInput.add(index); // Add user input
+                validateUserInput(); // Check the input after each click
+            });
+        }
+    }
+    // Validate the user's input against the sequence
+    private void validateUserInput() {
+        if (userInput.size() <= sequence.size()) {
+            if (userInput.get(userInput.size() - 1).equals(sequence.get(userInput.size() - 1))) {
+                if (userInput.size() == sequence.size()) {
+                    countDown.setVisibility(View.VISIBLE);
+                    countDown.setText("You Won!");
+                    disableUserInput(); // Disable further input
+                }
+            } else {
+                countDown.setVisibility(View.VISIBLE);
+                countDown.setText("You Lost!");
+                disableUserInput(); // Disable further input
+            }
+        }
+    }
+    // Get the original drawable resource for a button
+    private int getWoolDrawable(ImageButton button) {
+        if (button == redWool) return R.drawable.redwool;
+        if (button == yellowWool) return R.drawable.yellowwool;
+        if (button == greenWool) return R.drawable.greenwool;
+        if (button == blueWool) return R.drawable.bluewool;
+        return 0; // Default, should not occur
+    }
+    // Disable user input by removing click listeners
+    private void disableUserInput() {
+        for (ImageButton button : buttonList) {
+            button.setOnClickListener(null); // Remove click listener
+        }
     }
 }
