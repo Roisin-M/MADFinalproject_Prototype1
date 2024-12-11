@@ -86,32 +86,25 @@ public class GamePlay extends AppCompatActivity {
                     float z = event.values[2];
                     tvAccelerometer.setText(String.format("x: %.2f, y: %.2f, z: %.2f", x, y, z));
 
-                    //testing
-                    //neutral =x: 9.60, y: -0.54, z: 0.79
-                    //Forward =x: 1.52, y: -0.16, z: 9.34
-                    //Backward =x: 3.38, y: -0.38, z:9.64
-                    //left = x: 9.76, y: -0.65, z: 0.82
-                    //right =x: 9.78, y: 0.16, z: 0.85
-
                     // Example logic for tilt direction
-                    if(z>8){
-                        if (x<2.5) {
-                            // Phone tilted forward
-                            handleTilt("forward");
-                        } else if (x > 2.5 && x<8) {
-                            // Phone tilted backward
-                            handleTilt("backward");
-                        }
+                    int tiltnegativeLimit=-3;
+                    int tiltPositiveLimit=3;
+
+                    if (x<tiltnegativeLimit) {
+                        // Phone tilted right
+                        handleTilt("right");
+                    } else if (x>tiltPositiveLimit) {
+                        // Phone tilted left
+                        handleTilt("left");
                     }
-                    else{
-                        if (y>0) {
-                            // Phone tilted right
-                            handleTilt("right");
-                        } else if (y<0) {
-                            // Phone tilted left
-                            handleTilt("left");
-                        }
+                    if (y>tiltnegativeLimit) {
+                        // Phone tilted forward
+                        handleTilt("forward");
+                    } else if (y<tiltPositiveLimit) {
+                        // Phone tilted backward
+                        handleTilt("backward");
                     }
+
                 }
 
                 @Override
