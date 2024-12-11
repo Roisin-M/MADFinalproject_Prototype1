@@ -1,6 +1,10 @@
 package com.example.finalproject_prototype1;
 
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -32,11 +36,25 @@ public class GamePlay extends AppCompatActivity {
     private int score = 0; // Track the score
     private int sequenceLength = 4; // level 1 is 4 colours
 
+    //testing accelerometer
+    private TextView tvAccelerometer;
+    // Fields for the accelerometer
+    private SensorManager sensorManager;
+    private Sensor sensorAccelerometer;
+    private SensorEventListener sensorEventListenerAcc;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_play);
+
+        //initialise sensor manager
+        //testing accelerometer
+        tvAccelerometer = findViewById(R.id._tv_test_Acc);
+        // Initialize SensorManager and Accelerometer
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         // Initialise buttons and TextView
         yellowWool = findViewById(R.id.IV_yellowWool);
@@ -57,7 +75,76 @@ public class GamePlay extends AppCompatActivity {
             generateRandomSequence(4);
             displaySequence(this::enableUserInput);
         });
+
+        //Accelerometer listener
+        if (sensorAccelerometer != null) {
+            sensorEventListenerAcc = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    float x = event.values[0];
+                    float y = event.values[1];
+                    float z = event.values[2];
+                    tvAccelerometer.setText(String.format("x: %.2f, y: %.2f, z: %.2f", x, y, z));
+
+                    //testing
+                    //neutral =x: 9.60, y: -0.54, z: 0.79
+                    //Forward =x: 1.52, y: -0.16, z: 9.34
+                    //Backward =x: 3.38, y: -0.38, z:9.64
+                    //left = x: 9.76, y: -0.65, z: 0.82
+                    //right =x: 9.78, y: 0.16, z: 0.85
+
+                    // Example logic for tilt direction
+                    if(z>8){
+                        if (x<2.5) {
+                            // Phone tilted forward
+                            handleTilt("forward");
+                        } else if (x > 2.5 && x<8) {
+                            // Phone tilted backward
+                            handleTilt("backward");
+                        }
+                    }
+                    else{
+                        if (y>0) {
+                            // Phone tilted right
+                            handleTilt("right");
+                        } else if (y<0) {
+                            // Phone tilted left
+                            handleTilt("left");
+                        }
+                    }
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                    // Handle accuracy changes if needed
+                }
+            };
+        } else {
+            Toast.makeText(this, "Accelerometer not available!", Toast.LENGTH_SHORT).show();
+        }
     }
+    // Handle phone tilt
+    private void handleTilt(String direction) {
+        Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
+    }
+
+    // Register and unregister the listener to save battery
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (sensorAccelerometer != null) {
+            sensorManager.registerListener(sensorEventListenerAcc, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (sensorAccelerometer != null) {
+            sensorManager.unregisterListener(sensorEventListenerAcc);
+        }
+    }
+
     // Display a countdown before the game starts
     private void displayCountDown(Runnable onComplete) {
         int countdownDuration = 4000; // Total countdown duration
