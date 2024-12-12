@@ -1,6 +1,10 @@
 package com.example.finalproject_prototype1;
 
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -26,17 +30,34 @@ public class GamePlay extends AppCompatActivity {
     private TextView countDown;
     private List<ImageButton> buttonList; // List of wool buttons
     private List<Integer> sequence; // Random sequence of indices
-    private List<Integer> userInput; // User input sequence
+    private List<Integer> userTiltInput; // User input sequence
     private Handler handler = new Handler(); // Handler for delayed tasks
     private Random random = new Random(); // Random generator
     private int score = 0; // Track the score
     private int sequenceLength = 4; // level 1 is 4 colours
+    private boolean isFlat = true; // Tracks if the phone is in a neutral position
+
+    //testing accelerometer
+    //private TextView tvAccelerometer;
+    // Fields for the accelerometer
+    private SensorManager sensorManager;
+    private Sensor sensorAccelerometer;
+    private SensorEventListener sensorEventListenerAcc;
+   
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_play);
+        //initialise tilt input list
+        userTiltInput=new ArrayList<>();
+        //initialise sensor manager and the accelerometer
+        //testing accelerometer
+       // tvAccelerometer = findViewById(R.id._tv_test_Acc);
+        // Initialize SensorManager and Accelerometer
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         // Initialise buttons and TextView
         yellowWool = findViewById(R.id.IV_yellowWool);
@@ -55,9 +76,119 @@ public class GamePlay extends AppCompatActivity {
         // Display game countdown using Runnable to wait for methods to complete
         displayCountDown(() -> {
             generateRandomSequence(4);
-            displaySequence(this::enableUserInput);
+            displaySequence(this::enableUserTiltInput);
         });
+
+        //Initialise the accelerometer listener
+        initialiseAccelerometerListener();
+
     }
+
+    private void initialiseAccelerometerListener(){
+        //Accelerometer listener
+        if (sensorAccelerometer != null) {
+            sensorEventListenerAcc = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    float x = event.values[0];
+                    float y = event.values[1];
+                    float z = event.values[2];
+                   // tvAccelerometer.setText(String.format("x: %.2f, y: %.2f, z: %.2f", x, y, z));
+
+                    // Example logic for tilt direction
+                    int tiltnegativeLimit=-3;
+                    int tiltPositiveLimit=3;
+                    int tiltNeutralNegativeLimit = -1;
+                    int tiltNeutralPositiveLimit = 1;
+
+                    //detect if the phone is in flat position
+                    if (x > tiltNeutralNegativeLimit && x < tiltNeutralPositiveLimit
+                            && y > tiltNeutralNegativeLimit && y < tiltNeutralPositiveLimit) {
+                        isFlat = true;
+                    }
+
+                    //handle tilt only if phone is currently flat
+                    if (isFlat){
+                        if (y<tiltnegativeLimit) {
+                            // Phone tilted right
+                            handleTilt("right");
+                        } else if (y>tiltPositiveLimit) {
+                            // Phone tilted left
+                            handleTilt("left");
+                        }
+                        else if (x>tiltPositiveLimit) {
+                            // Phone tilted forward
+                            handleTilt("forward");
+                        } else if (x<tiltnegativeLimit) {
+                            // Phone tilted backward
+                            handleTilt("backward");
+                        }
+                    }
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                    // Handle accuracy changes
+                }
+            };
+        } else {
+            Toast.makeText(this, "Accelerometer not available!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Handle phone tilt
+    private void handleTilt(String direction) {
+       // Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
+        //mark the phone as not flat
+        isFlat=false;
+        int tiltIndex = mapDirectionToIndex(direction);
+        if (tiltIndex != -1) {
+            userTiltInput.add(tiltIndex);
+            validateTiltInput();
+        }
+        else{
+            Toast.makeText(this, "Try tilt again", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private int mapDirectionToIndex(String direction) {
+        switch (direction) {
+            case "left": return 0;      // Red Wool
+            case "forward": return 1;   // Yellow Wool
+            case "right": return 2;     // Green Wool
+            case "backward": return 3;  // Blue Wool
+            default: return -1;         // Invalid direction
+        }
+    }
+
+    private void enableUserTiltInput() {
+        sensorManager.registerListener(sensorEventListenerAcc, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        countDown.setVisibility(View.VISIBLE);
+        countDown.setText("COPY!");
+        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
+    }
+
+    private void disableUserTiltInput() {
+        sensorManager.unregisterListener(sensorEventListenerAcc);
+        userTiltInput.clear(); // Clear tilt inputs for the next round
+    }
+
+    // Register and unregister the listener to save battery
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (sensorAccelerometer != null) {
+            sensorManager.registerListener(sensorEventListenerAcc, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (sensorAccelerometer != null) {
+            sensorManager.unregisterListener(sensorEventListenerAcc);
+        }
+    }
+
     // Display a countdown before the game starts
     private void displayCountDown(Runnable onComplete) {
         int countdownDuration = 4000; // Total countdown duration
@@ -91,40 +222,23 @@ public class GamePlay extends AppCompatActivity {
         // Call the onComplete Runnable after the sequence finishes
         handler.postDelayed(onComplete, sequence.size() * 2000);
     }
-    // Enable user input by setting click listeners
-    private void enableUserInput() {
-        //prompt user to input
-        countDown.setVisibility(View.VISIBLE);
-        countDown.setText("COPY!");
-        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
-        // add click listeners to the buttons
-        userInput = new ArrayList<>();
-        for (int i = 0; i < buttonList.size(); i++) {
-            final int index = i; // Capture the index for comparison
-            ImageButton button = buttonList.get(i);
-            button.setOnClickListener(v -> {
-                userInput.add(index); // Add user input
-                validateUserInput(); // Check the input after each click
-            });
-        }
-    }
-    // Validate the user's input against the sequence
-    private void validateUserInput() {
-        if (userInput.size() <= sequence.size()) {
-            if (userInput.get(userInput.size() - 1).equals(sequence.get(userInput.size() - 1))) {
-                if (userInput.size() == sequence.size()) {
+
+    private void validateTiltInput() {
+        if (userTiltInput.size() <= sequence.size()) {
+            int currentIndex = userTiltInput.size() - 1;
+            if (userTiltInput.get(currentIndex).equals(sequence.get(currentIndex))) {
+                if (userTiltInput.size() == sequence.size()) {
                     countDown.setVisibility(View.VISIBLE);
                     countDown.setText("You Won!");
-                    //update score
-                    score += sequenceLength;
-                    disableUserInput(); // Disable further input
-                    prepareNextRound();
+                    score += sequenceLength; // Update score
+                    disableUserTiltInput();  // Disable tilt input
+                    prepareNextRound();      // Move to the next round
                 }
             } else {
                 countDown.setVisibility(View.VISIBLE);
                 countDown.setText("You Lost!");
-                disableUserInput(); // Disable further input
-                handler.postDelayed(this::navigateToGameOver,2000); // Navigate to game over
+                disableUserTiltInput();
+                handler.postDelayed(this::navigateToGameOver, 2000);
             }
         }
     }
@@ -136,12 +250,7 @@ public class GamePlay extends AppCompatActivity {
         if (button == blueWool) return R.drawable.bluewool;
         return 0; // Default, should not occur
     }
-    // Disable user input by removing click listeners
-    private void disableUserInput() {
-        for (ImageButton button : buttonList) {
-            button.setOnClickListener(null); // Remove click listener
-        }
-    }
+
     // Prepare the next round of the game
     private void prepareNextRound() {
         handler.postDelayed(() -> {
@@ -149,7 +258,7 @@ public class GamePlay extends AppCompatActivity {
             displayCountDown(() -> {
                 //start next round with updated sequence
                 generateRandomSequence(sequenceLength);
-                displaySequence(this::enableUserInput);
+                displaySequence(this::enableUserTiltInput);
             });
         }, 2000); // Delay before starting the next round
     }

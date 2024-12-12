@@ -20,8 +20,57 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.852"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.333"
         tools:text="Top 5 Scores:\n\n1. Alice: 20\n2. Bob: 18\n3. Carol: 15\n4. Dave: 10\n5. Eve: 5" />
+
+    <Button
+        android:id="@+id/btn_NavGameOver"
+        android:layout_width="185dp"
+        android:layout_height="84dp"
+        android:layout_marginTop="296dp"
+        android:layout_marginEnd="128dp"
+        android:backgroundTint="@color/blue"
+        android:text="@string/HScr_Back"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="382dp"
+        android:layout_height="207dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/hacker_cat_svgrepo_com"
+        tools:layout_editor_absoluteX="-80dp" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="132dp"
+        android:layout_height="98dp"
+        android:layout_marginEnd="596dp"
+        android:text="@string/HScr_notGood"
+        android:textAlignment="center"
+        android:textColor="@color/material_dynamic_neutral10"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.194" />
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="334dp"
+        android:layout_height="191dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.163"
+        app:srcCompat="@drawable/speechbubble"
+        tools:layout_editor_absoluteX="228dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

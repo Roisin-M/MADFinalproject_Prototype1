@@ -10,4 +10,7 @@
     <string name="GmOver_ScoreLabel">Your Score : </string>
     <string name="GmOver_PlayAgain">PLAY AGAIN</string>
     <string name="GmOver_leaderBrd">LEADERBOARD</string>
+    <!--High Scores/ leaderboard screen-->
+    <string name="HScr_Back">BACK</string>
+    <string name="HScr_notGood">You are still not better than me</string>
 </resources>
