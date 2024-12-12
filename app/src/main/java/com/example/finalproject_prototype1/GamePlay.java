@@ -35,6 +35,7 @@ public class GamePlay extends AppCompatActivity {
     private Random random = new Random(); // Random generator
     private int score = 0; // Track the score
     private int sequenceLength = 4; // level 1 is 4 colours
+    private boolean isFlat = true; // Tracks if the phone is in a neutral position
 
     //testing accelerometer
     private TextView tvAccelerometer;
@@ -97,22 +98,32 @@ public class GamePlay extends AppCompatActivity {
                     // Example logic for tilt direction
                     int tiltnegativeLimit=-3;
                     int tiltPositiveLimit=3;
+                    int tiltNeutralNegativeLimit = -1;
+                    int tiltNeutralPositiveLimit = 1;
 
-                    if (y<tiltnegativeLimit) {
-                        // Phone tilted right
-                        handleTilt("right");
-                    } else if (y>tiltPositiveLimit) {
-                        // Phone tilted left
-                        handleTilt("left");
-                    }
-                    else if (x>tiltPositiveLimit) {
-                        // Phone tilted forward
-                        handleTilt("forward");
-                    } else if (x<tiltnegativeLimit) {
-                        // Phone tilted backward
-                        handleTilt("backward");
+                    //detect if the phone is in flat position
+                    if (x > tiltNeutralNegativeLimit && x < tiltNeutralPositiveLimit
+                            && y > tiltNeutralNegativeLimit && y < tiltNeutralPositiveLimit) {
+                        isFlat = true;
                     }
 
+                    //handle tilt only if phone is currently flat
+                    if (isFlat){
+                        if (y<tiltnegativeLimit) {
+                            // Phone tilted right
+                            handleTilt("right");
+                        } else if (y>tiltPositiveLimit) {
+                            // Phone tilted left
+                            handleTilt("left");
+                        }
+                        else if (x>tiltPositiveLimit) {
+                            // Phone tilted forward
+                            handleTilt("forward");
+                        } else if (x<tiltnegativeLimit) {
+                            // Phone tilted backward
+                            handleTilt("backward");
+                        }
+                    }
                 }
 
                 @Override
@@ -128,10 +139,15 @@ public class GamePlay extends AppCompatActivity {
     // Handle phone tilt
     private void handleTilt(String direction) {
         Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
+        //mark the phone as not flat
+        isFlat=false;
         int tiltIndex = mapDirectionToIndex(direction);
         if (tiltIndex != -1) {
             userTiltInput.add(tiltIndex);
             validateTiltInput();
+        }
+        else{
+            Toast.makeText(this, "Try tilt again", Toast.LENGTH_SHORT).show();
         }
     }
     private int mapDirectionToIndex(String direction) {
