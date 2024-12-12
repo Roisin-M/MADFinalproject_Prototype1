@@ -38,7 +38,7 @@ public class GamePlay extends AppCompatActivity {
     private boolean isFlat = true; // Tracks if the phone is in a neutral position
 
     //testing accelerometer
-    private TextView tvAccelerometer;
+    //private TextView tvAccelerometer;
     // Fields for the accelerometer
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
@@ -54,7 +54,7 @@ public class GamePlay extends AppCompatActivity {
         userTiltInput=new ArrayList<>();
         //initialise sensor manager and the accelerometer
         //testing accelerometer
-        tvAccelerometer = findViewById(R.id._tv_test_Acc);
+       // tvAccelerometer = findViewById(R.id._tv_test_Acc);
         // Initialize SensorManager and Accelerometer
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -93,7 +93,7 @@ public class GamePlay extends AppCompatActivity {
                     float x = event.values[0];
                     float y = event.values[1];
                     float z = event.values[2];
-                    tvAccelerometer.setText(String.format("x: %.2f, y: %.2f, z: %.2f", x, y, z));
+                   // tvAccelerometer.setText(String.format("x: %.2f, y: %.2f, z: %.2f", x, y, z));
 
                     // Example logic for tilt direction
                     int tiltnegativeLimit=-3;
@@ -138,7 +138,7 @@ public class GamePlay extends AppCompatActivity {
 
     // Handle phone tilt
     private void handleTilt(String direction) {
-        Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
         //mark the phone as not flat
         isFlat=false;
         int tiltIndex = mapDirectionToIndex(direction);
