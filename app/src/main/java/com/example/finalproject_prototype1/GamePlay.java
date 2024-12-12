@@ -30,7 +30,7 @@ public class GamePlay extends AppCompatActivity {
     private TextView countDown;
     private List<ImageButton> buttonList; // List of wool buttons
     private List<Integer> sequence; // Random sequence of indices
-    private List<Integer> userInput; // User input sequence
+    private List<Integer> userTiltInput; // User input sequence
     private Handler handler = new Handler(); // Handler for delayed tasks
     private Random random = new Random(); // Random generator
     private int score = 0; // Track the score
@@ -42,14 +42,16 @@ public class GamePlay extends AppCompatActivity {
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private SensorEventListener sensorEventListenerAcc;
+   
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game_play);
-
-        //initialise sensor manager
+        //initialise tilt input list
+        userTiltInput=new ArrayList<>();
+        //initialise sensor manager and the accelerometer
         //testing accelerometer
         tvAccelerometer = findViewById(R.id._tv_test_Acc);
         // Initialize SensorManager and Accelerometer
@@ -73,9 +75,15 @@ public class GamePlay extends AppCompatActivity {
         // Display game countdown using Runnable to wait for methods to complete
         displayCountDown(() -> {
             generateRandomSequence(4);
-            displaySequence(this::enableUserInput);
+            displaySequence(this::enableUserTiltInput);
         });
 
+        //Initialise the accelerometer listener
+        initialiseAccelerometerListener();
+
+    }
+
+    private void initialiseAccelerometerListener(){
         //Accelerometer listener
         if (sensorAccelerometer != null) {
             sensorEventListenerAcc = new SensorEventListener() {
@@ -90,17 +98,17 @@ public class GamePlay extends AppCompatActivity {
                     int tiltnegativeLimit=-3;
                     int tiltPositiveLimit=3;
 
-                    if (x<tiltnegativeLimit) {
+                    if (y<tiltnegativeLimit) {
                         // Phone tilted right
                         handleTilt("right");
-                    } else if (x>tiltPositiveLimit) {
+                    } else if (y>tiltPositiveLimit) {
                         // Phone tilted left
                         handleTilt("left");
                     }
-                    if (y>tiltnegativeLimit) {
+                    else if (x>tiltPositiveLimit) {
                         // Phone tilted forward
                         handleTilt("forward");
-                    } else if (y<tiltPositiveLimit) {
+                    } else if (x<tiltnegativeLimit) {
                         // Phone tilted backward
                         handleTilt("backward");
                     }
@@ -109,16 +117,43 @@ public class GamePlay extends AppCompatActivity {
 
                 @Override
                 public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                    // Handle accuracy changes if needed
+                    // Handle accuracy changes
                 }
             };
         } else {
             Toast.makeText(this, "Accelerometer not available!", Toast.LENGTH_SHORT).show();
         }
     }
+
     // Handle phone tilt
     private void handleTilt(String direction) {
         Toast.makeText(this, "Tilt: " + direction, Toast.LENGTH_SHORT).show();
+        int tiltIndex = mapDirectionToIndex(direction);
+        if (tiltIndex != -1) {
+            userTiltInput.add(tiltIndex);
+            validateTiltInput();
+        }
+    }
+    private int mapDirectionToIndex(String direction) {
+        switch (direction) {
+            case "left": return 0;      // Red Wool
+            case "forward": return 1;   // Yellow Wool
+            case "right": return 2;     // Green Wool
+            case "backward": return 3;  // Blue Wool
+            default: return -1;         // Invalid direction
+        }
+    }
+
+    private void enableUserTiltInput() {
+        sensorManager.registerListener(sensorEventListenerAcc, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        countDown.setVisibility(View.VISIBLE);
+        countDown.setText("COPY!");
+        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
+    }
+
+    private void disableUserTiltInput() {
+        sensorManager.unregisterListener(sensorEventListenerAcc);
+        userTiltInput.clear(); // Clear tilt inputs for the next round
     }
 
     // Register and unregister the listener to save battery
@@ -171,40 +206,23 @@ public class GamePlay extends AppCompatActivity {
         // Call the onComplete Runnable after the sequence finishes
         handler.postDelayed(onComplete, sequence.size() * 2000);
     }
-    // Enable user input by setting click listeners
-    private void enableUserInput() {
-        //prompt user to input
-        countDown.setVisibility(View.VISIBLE);
-        countDown.setText("COPY!");
-        handler.postDelayed(() -> countDown.setVisibility(View.INVISIBLE), 2000);
-        // add click listeners to the buttons
-        userInput = new ArrayList<>();
-        for (int i = 0; i < buttonList.size(); i++) {
-            final int index = i; // Capture the index for comparison
-            ImageButton button = buttonList.get(i);
-            button.setOnClickListener(v -> {
-                userInput.add(index); // Add user input
-                validateUserInput(); // Check the input after each click
-            });
-        }
-    }
-    // Validate the user's input against the sequence
-    private void validateUserInput() {
-        if (userInput.size() <= sequence.size()) {
-            if (userInput.get(userInput.size() - 1).equals(sequence.get(userInput.size() - 1))) {
-                if (userInput.size() == sequence.size()) {
+
+    private void validateTiltInput() {
+        if (userTiltInput.size() <= sequence.size()) {
+            int currentIndex = userTiltInput.size() - 1;
+            if (userTiltInput.get(currentIndex).equals(sequence.get(currentIndex))) {
+                if (userTiltInput.size() == sequence.size()) {
                     countDown.setVisibility(View.VISIBLE);
                     countDown.setText("You Won!");
-                    //update score
-                    score += sequenceLength;
-                    disableUserInput(); // Disable further input
-                    prepareNextRound();
+                    score += sequenceLength; // Update score
+                    disableUserTiltInput();  // Disable tilt input
+                    prepareNextRound();      // Move to the next round
                 }
             } else {
                 countDown.setVisibility(View.VISIBLE);
                 countDown.setText("You Lost!");
-                disableUserInput(); // Disable further input
-                handler.postDelayed(this::navigateToGameOver,2000); // Navigate to game over
+                disableUserTiltInput();
+                handler.postDelayed(this::navigateToGameOver, 2000);
             }
         }
     }
@@ -216,12 +234,7 @@ public class GamePlay extends AppCompatActivity {
         if (button == blueWool) return R.drawable.bluewool;
         return 0; // Default, should not occur
     }
-    // Disable user input by removing click listeners
-    private void disableUserInput() {
-        for (ImageButton button : buttonList) {
-            button.setOnClickListener(null); // Remove click listener
-        }
-    }
+
     // Prepare the next round of the game
     private void prepareNextRound() {
         handler.postDelayed(() -> {
@@ -229,7 +242,7 @@ public class GamePlay extends AppCompatActivity {
             displayCountDown(() -> {
                 //start next round with updated sequence
                 generateRandomSequence(sequenceLength);
-                displaySequence(this::enableUserInput);
+                displaySequence(this::enableUserTiltInput);
             });
         }, 2000); // Delay before starting the next round
     }
